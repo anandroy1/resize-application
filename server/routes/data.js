@@ -1,32 +1,39 @@
 // routes/data.js
 const express = require('express');
-const Data = require('../models/data'); // Ensure this path is correct
-const validation = require('../utils/validation');
-
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+// In-memory storage for added data and entries
+let addedData = [];
+let entries = [];
+
+router.post('/', (req, res) => {
   const { action, newData } = req.body;
 
-  // Validate newData
-  if (!validation.isValidData(newData)) {
+  // Simple validation: Check if newData is not empty
+  if (!newData || (typeof newData !== 'object' && !newData.data)) {
     return res.status(400).json({ error: 'Invalid data format' });
   }
 
-  try {
-    if (action === 'add') {
-      // Insert new data into the database
-      await Data.create(newData);
-    } else if (action === 'update') {
-      // Update all documents in the database
-      await Data.updateMany({}, newData);
-    }
+  if (action === 'add') {
+    // Store new data in the array
+    addedData.push(newData);
 
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error in data API:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    // Store each entry separately
+    entries.push(newData.data);
+  } else if (action === 'update') {
+    // Update the existing data in the array (you can modify this part based on your data source)
+    addedData[0] = newData;
+
+    // Update the first entry with the updated data
+    entries[0] = newData.data;
   }
+
+  res.json({ success: true });
+});
+
+router.get('/entries', (req, res) => {
+  // Send the entries array in the response
+  res.json(entries);
 });
 
 module.exports = router;

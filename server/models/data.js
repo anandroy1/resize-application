@@ -2,8 +2,10 @@
 const mongoose = require('mongoose');
 
 const dataSchema = new mongoose.Schema({
-  width: Number,
-  height: Number,
+  data: {
+    type: String,
+    required: true,
+  },
 });
 
 const Data = mongoose.model('Data', dataSchema);
